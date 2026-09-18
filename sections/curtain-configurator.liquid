@@ -1,0 +1,177 @@
+{{ 'curtain-configurator.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'curtain-configurator.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+  assign pricing_tiers = product.metafields.custom.curtain_pricing_tiers.value
+  assign minimum_width = blank
+  assign maximum_width = blank
+
+  for tier in pricing_tiers
+    assign tier_minimum = tier.min_width.value
+    assign tier_maximum = tier.max_width.value
+
+    if minimum_width == blank or tier_minimum < minimum_width
+      assign minimum_width = tier_minimum
+    endif
+    if maximum_width == blank or tier_maximum > maximum_width
+      assign maximum_width = tier_maximum
+    endif
+  endfor
+-%}
+
+<section class="curtain-product page-width" id="CurtainProduct-{{ section.id }}">
+  <div class="curtain-product__media">
+    {%- if product.featured_image -%}
+      {{
+        product.featured_image
+        | image_url: width: 1400
+        | image_tag:
+          class: 'curtain-product__image',
+          loading: 'eager',
+          widths: '400, 700, 1000, 1400',
+          sizes: '(min-width: 990px) 50vw, 100vw'
+      }}
+    {%- endif -%}
+  </div>
+
+  <div class="curtain-product__content">
+    <h1 class="curtain-product__title">{{ product.title | escape }}</h1>
+    {%- if product.description != blank -%}
+      <div class="curtain-product__description rte">{{ product.description }}</div>
+    {%- endif -%}
+
+    {%- if pricing_tiers == blank -%}
+      <p class="curtain-product__error" role="alert">This product is missing its curtain pricing tiers.</p>
+    {%- else -%}
+      <curtain-configurator
+        class="curtain-configurator"
+        data-section-id="{{ section.id }}"
+        data-width-option-name="{{ section.settings.width_option_name | escape }}"
+        data-drop-option-name="{{ section.settings.drop_option_name | escape }}"
+        data-currency="{{ cart.currency.iso_code | default: shop.currency | escape }}"
+      >
+        <div class="curtain-configurator__tiers" hidden>
+          {%- for tier in pricing_tiers -%}
+            <span
+              data-curtain-tier
+              data-min-width="{{ tier.min_width.value }}"
+              data-max-width="{{ tier.max_width.value }}"
+              data-panels="{{ tier.panels_required.value }}"
+              data-base-price="{{ tier.base_price.value }}"
+              data-price-per-drop-tier="{{ tier.price_per_drop_tier.value }}"
+            ></span>
+          {%- endfor -%}
+        </div>
+        <script type="application/json" data-curtain-variants>{{ product.variants | json }}</script>
+        <script type="application/json" data-curtain-options>{{ product.options | json }}</script>
+
+        <div class="curtain-configurator__field">
+          <label for="CurtainWidth-{{ section.id }}">Width (cm)</label>
+          <input
+            id="CurtainWidth-{{ section.id }}"
+            type="number"
+            name="width"
+            min="{{ minimum_width }}"
+            max="{{ maximum_width }}"
+            step="1"
+            value="{{ minimum_width }}"
+            inputmode="numeric"
+            required
+            data-curtain-width
+            aria-describedby="CurtainWidthHelp-{{ section.id }} CurtainError-{{ section.id }}"
+          >
+          <p class="curtain-configurator__help" id="CurtainWidthHelp-{{ section.id }}">
+            Enter a whole number from {{ minimum_width }} to {{ maximum_width }} cm.
+          </p>
+        </div>
+
+        <div class="curtain-configurator__field">
+          <label for="CurtainDrop-{{ section.id }}">Drop (cm)</label>
+          <select id="CurtainDrop-{{ section.id }}" name="drop" required data-curtain-drop>
+            <option value="150">150 cm</option>
+            <option value="200">200 cm</option>
+            <option value="250">250 cm</option>
+          </select>
+        </div>
+
+        <fieldset class="curtain-configurator__fabrics">
+          <legend>Fabric colour</legend>
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'fabric' -%}
+              <label class="curtain-configurator__swatch" {{ block.shopify_attributes }}>
+                <input
+                  type="radio"
+                  name="fabric-{{ section.id }}"
+                  value="{{ block.settings.label | escape }}"
+                  data-curtain-fabric
+                  {% if forloop.first %}checked{% endif %}
+                >
+                <span class="curtain-configurator__swatch-colour" style="--swatch-colour: {{ block.settings.color }}" aria-hidden="true"></span>
+                <span>{{ block.settings.label | escape }}</span>
+              </label>
+            {%- endif -%}
+          {%- endfor -%}
+        </fieldset>
+
+        <div class="curtain-configurator__summary" aria-live="polite">
+          <span>Price for your measurements</span>
+          <strong data-curtain-price>Calculating…</strong>
+        </div>
+
+        <p class="curtain-configurator__error" id="CurtainError-{{ section.id }}" data-curtain-error role="alert"></p>
+
+        <button class="button curtain-configurator__add" type="button" data-curtain-add disabled>
+          <span data-curtain-add-label>Add to cart</span>
+        </button>
+      </curtain-configurator>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Curtain configurator",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "width_option_name",
+      "label": "Width variant option name",
+      "default": "Width range"
+    },
+    {
+      "type": "text",
+      "id": "drop_option_name",
+      "label": "Drop variant option name",
+      "default": "Drop"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "fabric",
+      "name": "Fabric swatch",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Fabric name",
+          "default": "Ivory"
+        },
+        {
+          "type": "color",
+          "id": "color",
+          "label": "Swatch colour",
+          "default": "#E9E2D2"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 12,
+  "presets": [
+    {
+      "name": "Curtain configurator"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,36 @@
+{
+  "sections": {
+    "main": {
+      "type": "curtain-configurator",
+      "blocks": {
+        "fabric_ivory": {
+          "type": "fabric",
+          "settings": {
+            "label": "Ivory",
+            "color": "#E9E2D2"
+          }
+        },
+        "fabric_sand": {
+          "type": "fabric",
+          "settings": {
+            "label": "Sand",
+            "color": "#C8B99F"
+          }
+        },
+        "fabric_slate": {
+          "type": "fabric",
+          "settings": {
+            "label": "Slate",
+            "color": "#62676B"
+          }
+        }
+      },
+      "block_order": ["fabric_ivory", "fabric_sand", "fabric_slate"],
+      "settings": {
+        "width_option_name": "Width range",
+        "drop_option_name": "Drop"
+      }
+    }
+  },
+  "order": ["main"]
+}
