@@ -157,7 +157,11 @@ if (!customElements.get('curtain-configurator')) {
           }
 
           if (this.cart && result.sections && sections.every((id) => result.sections[id])) {
-            this.cart.renderContents(result);
+            try {
+              this.cart.renderContents(result);
+            } catch (error) {
+              window.location.assign(window.routes?.cart_url || '/cart');
+            }
           } else {
             window.location.assign(window.routes?.cart_url || '/cart');
           }

@@ -1,0 +1,23 @@
+{
+  "name": "Curtain Pricing Tier",
+  "type": "curtain_pricing_tier",
+  "source": "Verified from Shopify Admin screenshots of the Curtain Pricing Tier definition and its three entries; entry values were also checked against the live product's Liquid output.",
+  "fields": [
+    { "key": "min_width", "type": "number_integer", "cardinality": "one" },
+    { "key": "max_width", "type": "number_integer", "cardinality": "one" },
+    { "key": "panels_required", "type": "number_integer", "cardinality": "one" },
+    { "key": "base_price", "type": "number_decimal", "cardinality": "one" },
+    { "key": "price_per_drop_tier", "type": "number_decimal", "cardinality": "one" }
+  ],
+  "product_metafield": {
+    "namespace": "custom",
+    "key": "curtain_pricing_tiers",
+    "type": "list.metaobject_reference",
+    "reference_type": "curtain_pricing_tier"
+  },
+  "entries": [
+    { "min_width": 50, "max_width": 120, "panels_required": 1, "base_price": 100.0, "price_per_drop_tier": 25.0 },
+    { "min_width": 121, "max_width": 240, "panels_required": 2, "base_price": 200.0, "price_per_drop_tier": 50.0 },
+    { "min_width": 241, "max_width": 360, "panels_required": 3, "base_price": 300.0, "price_per_drop_tier": 75.0 }
+  ]
+}
